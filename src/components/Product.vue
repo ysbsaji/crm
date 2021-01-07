@@ -1,156 +1,8 @@
+
 <template>
-  <div>
-  <v-form 
-    ref='form'
-    v-model="valid"
-  >
-   <v-container fluid>
-     <v-banner
-        color="cyan"
-        class="text-center my-3"
-        style="border-radius:4px"
-      >
-        <P class="display-1">Product Mangement</P>
-      </v-banner>
-      <v-row>
-        <v-col
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-text-field
-            label="Name"
-            outlined
-            dense
-            v-model="name"
-            :rules="[rules.required]"
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-text-field
-            label="NetPrice"
-            outlined
-            dense
-            v-model="netPrice"
-            :rules="[rules.required,rules.number]"
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-text-field
-            label="SalePrice"
-            outlined
-            dense
-            v-model="salePrice"
-            :rules="[rules.required,rules.number]"
-          ></v-text-field>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-textarea
-            solo
-            clearable
-            outlined
-            rows="3"
-            label="Description"
-            v-model="description"
-            :rules="[rules.required]"
-        ></v-textarea>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="6"
-          md="4"
-          >
-          <v-file-input
-            label="File input"
-            outlined
-            dense
-            :disabled="whileEdit"
-            @change="CreateImage"
-          ></v-file-input>
-        </v-col>
-        <v-col
-          cols="12"
-          sm="6"
-          md="2"
-        >
-        <v-btn
-          color="primary"
-          :disabled= "!valid"
-          v-show="addBtn"
-          @click="addProduct"
-         >
-          AddProduct
-        </v-btn>
-        <v-btn
-          color="primary"
-          v-show="editBtn"
-          @click="onEdit"
-         >
-          Update
-        </v-btn>
-        </v-col>
-          <v-col
-          cols="12"
-          sm="6"
-          md="2"
-        >
-        <v-btn
-          depressed
-          color="deep-orange"
-          @click="cancel"
-         >
-          Cancel
-        </v-btn>
-        </v-col>
-        <v-alert
-          dense
-          text
-          type="success"
-          v-model="alert"
-          transition=" "
-        >
-          Product has been added successfully
-        </v-alert>
-      </v-row>
-    </v-container>
-  </v-form>
-  <v-data-table
-    :headers="headers"
-    :items="productDetails"
-    :items-per-page="5"
-    class="elevation-1"
-  >
-    <template v-slot:item.action="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editProduct(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="delDialog = true; deleteId = item.id"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-    <span>No data here</span> 
-    </template>
-    </v-data-table>
+   <div>
+    <form-data :references.sync="formReferences" :model="productObj" ref="form"></form-data>
+    <data-table :payload="displayObj" ></data-table>
     <v-dialog
       v-model="delDialog"
       max-width="320"
@@ -179,139 +31,230 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-row>
-    <v-col cols="12"
-      lg="3"
-      v-for="item in productDetails" :key="item.code" style="list-style-type: none"
-    >
-      <v-card>
-        <v-card-title>
-          <h4>Product Name: {{ item.name }}</h4>
-          <img :src="item.url" style="width:100%; height:100px" alt="Image not Availabe"> 
-        </v-card-title>
-        <v-divider></v-divider>
-        <v-card-text>
-          <p>Product Code: {{ item.id }}</p> 
-        </v-card-text>
-        <v-card-text>
-          <p>Net Price: {{ item.netPrice }} </p>
-        </v-card-text>
-        <v-card-text>
-          <p>Sale Price:  {{ item.salePrice }}</p>
-        </v-card-text>
-        <v-card-text>
-          <p>Description: {{ item.description }}</p>
-        </v-card-text>
-      </v-card> 
-    </v-col>
-  </v-row>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import FormInput from '@/components/FormInput'
+import DataList from '@/components/DataList.vue'
 export default {
-  data(){
-    return{
-      alert: false,
-      addBtn: true,
-      editBtn: false,
-      name: '',
-      valid: true,
-      netPrice: '',
-      salePrice: '',
-      description: '',
+   data () {
+    return {
       delDialog: false,
-      editId:'',
-      deleteId:'',
-      whileEdit: false,
-      rules: {
-        required: value => !!value || 'Required.',
-        number: value => !isNaN(value) || 'Invalid input'
+      productObj: {
+        id: null,
       },
-      image:'',
-      headers:[
-        { text: 'Product code', value: 'id' },
-        { text: 'Product Name', value: 'name' },
-        { text: 'Net Price', value: 'netPrice' },
-        { text: 'Sale Price', value: 'salePrice' },
-        { text: 'Description', value: 'description' },
-        { text: 'Actions', value: 'action', sortable: false }
-      ],
-      productDetails:[]
+      displayObj:{
+        headers: [{
+        text: 'Product Code',
+        value: 'id',
+        width: '20%'
+      },{
+        text: 'Product Name',
+        value: 'name',
+        width: '20%'
+      },
+      {
+        text: 'Net Price',
+        value: 'netPrice',
+        width: '20%'
+      },
+      {
+        text: 'Sale Price',
+        value: 'salePrice',
+        width: '10%'
+      },{
+        text: 'Description',
+        value: 'description',
+        width: '10%'
+      },{
+        text: 'Image',
+        value: 'image',
+        width: '10%'
+      },{
+        text: 'Actions',
+        value: 'actions',
+        width: '20%'
+      }],
+        list: [],
+        selection: [],
+        showSelect: true,
+        isHideAdd: true,
+        loading: true,
+        actionsList:[{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.edit(item),
+          icon:'mdi-pencil'
+        },{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.del(item),
+          icon:'mdi-delete'
+        }]
+      },
+      total: 0,
     }
   },
+  components: {
+    'form-data': FormInput,
+    'data-table': DataList
+  },
+  computed: {
+    ...mapGetters(['formType']),
+    formReferences () {
+       return {
+        title: 'Product Management',
+        properties: [ {
+          model: 'name',
+          type: this.formType.TEXT,
+          rules:[ v => !!v || 'reqired'],
+          label: 'Name',
+          hide: false,
+          class: 'lg4 sm6'
+        },{
+          model: 'netPrice',
+          type: this.formType.NUMBER,
+          rules: [ v => !!v || 'reqired' ,v => !isNaN(v) || 'Invalid input'],
+          hide: false,
+          label: 'Net Price',
+          class: 'lg4 sm6'
+        },{
+          model: 'salePrice',
+          type: this.formType.NUMBER,
+          rules: [ v => !!v || 'reqired' ,v => !isNaN(v) || 'Invalid input'],
+          hide: false,
+          label: 'Sale Price',
+          class: 'lg4 sm6'
+        }
+        ,{
+          model: 'description',
+          type: this.formType.TEXTAREA,
+          rules: [],
+          rows: 3,
+          label: 'Description',
+          class: 'lg4 sm6'
+        },{
+          model: 'file',
+          type: this.formType.FILES,
+          rules: [],
+          change: (file) => this.CreateImage(file[0]),
+          label: 'Files',
+          is_show: true,
+          class: 'lg4 sm6'
+        }
+        ],
+         buttons: [{
+          name: 'action_handler',
+          color: 'success',
+          label: 'Save',
+          click: () => this.addProduct(),
+          is_show: true
+        },
+        {
+          name: 'action_handler_update',
+          color: 'primary',
+          label: 'Update',
+          click: () => this.updateProduct(),
+          is_show: false
+        },
+         {
+          name: 'action_handler_cancel',
+          color: 'orange',
+          label: 'Cancel',
+          click: () => this.cancel(),
+          is_show: true
+        }]
+    }
+  },
+  },
   methods: {
-    addProduct(){
-      this.productDetails.push({
-      id: Math.floor(Math.random() * 100) + 1,
-      name:this.name,
-      netPrice:this.netPrice,
-      salePrice:this.salePrice,
-      description:this.description,
-      price:this.salePrice,
-      url:this.image
-      })
-      this.alert = true
-      setTimeout(() => {
-        this.alert = false
-      },2000)
-      localStorage.setItem('productDetails',JSON.stringify(this.productDetails))
-      this.$refs.form.resetValidation();
-      this.$refs.form.reset();
+   addProduct(){
+    if(this.$refs.form.$refs.validateForm.validate()){
+      this.productObj.id =  Math.floor(Math.random() * 100) + 1
+      this.displayObj.list.push(this.productObj)
+      localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))
+      this.getProduct()
+    }
     },
-    onEdit(){
-      this.editBtn = false
-      this.addBtn = true
-      this.productDetails.find(val => {
-        if(val.id === this.editId){
-          val.name = this.name
-          val.netPrice = this.netPrice
-          val.salePrice = this.salePrice
-          val.description = this.description
+    getProduct(){
+      this.displayObj.list = []
+      let details = localStorage.getItem('productDetails')
+      let product = JSON.parse(details)
+      product.forEach(val => {
+        this.displayObj.list.push(val)
+      })
+      this.displayObj.loading = false
+      this.$refs.form.$refs.validateForm.reset()
+    },
+    edit(val){
+      this.productObj = Object.assign({}, val)
+      this.$refs.form._props.references.buttons[0].is_show = false
+      this.$refs.form._props.references.buttons[1].is_show = true
+    },
+    updateProduct(){
+      this.$refs.form._props.references.buttons[0].is_show = true
+      this.$refs.form._props.references.buttons[1].is_show = false
+      this.displayObj.list.find((val) =>{
+        if(val.id === this.productObj.id){
+          val.name = this.productObj.name
+          val.salePrice = this.productObj.salePrice
+          val.netPrice = this.productObj.netPrice
+          val.description  = this.productObj.description
+          val.image = this.productObj.image
         }
       })
-      localStorage.setItem('productDetails',JSON.stringify(this.productDetails))
-      this.whileEdit = false
-      this.$refs.form.resetValidation();
-      this.$refs.form.reset();
+      localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))
+      this.$refs.form.$refs.validateForm.reset()
     },
-    cancel(){
-      this.$refs.form.resetValidation();
-      this.$refs.form.reset();
-    },
-    editProduct(item){
-      this.editBtn = true
-      this.addBtn = false
-      this.name = item.name
-      this.netPrice = item.netPrice
-      this.salePrice = item.salePrice
-      this.description = item.description
-      this.whileEdit = true
-      this.editId = item.id
+    del(item){
+      this.delDialog = true
+      this.delItem = item
     },
     confirmDel(){
       this.delDialog = false
-      this.productDetails.find((val,index) => {
-         val.id === this.deleteId ? this.productDetails.splice(index,1) : ''
+      this.displayObj.list.find((val,index) => {
+        val === this.delItem ? this.displayObj.list.splice(index,1) : false
       })
-      localStorage.setItem('productDetails',JSON.stringify(this.productDetails))
-    },
-    getProductData(){
-      if(localStorage.getItem('productDetails')){
-        let productDetails = localStorage.getItem('productDetails')
-        this.productDetails= JSON.parse(productDetails)
-      }
+      localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))
     },
     CreateImage(file){
+      if(file){
         var reader = new FileReader();
         reader.addEventListener('load', (e) => {
-          this.image = e.target.result
-        })
+        this.productObj.image = e.target.result
+      })
         reader.readAsDataURL(file)
+      }
+    },
+    cancel(){
+      this.productObj={
+        id: null,
+      }
+      this.$refs.form.$refs.validateForm.resetValidation()
+    },
+    getDetails(){
+      setTimeout(() => {
+        if(localStorage.getItem('productDetails')){
+        let product = localStorage.getItem('productDetails')
+        this.displayObj.list= JSON.parse(product)
+        this.displayObj.loading = false
+      }
+      },2000)
+      this.$root.$on('deleteItems', (data) => {
+      this.displayObj.list.find((val,index) => {
+        val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+      })
+     localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))  
+     })
     }
   },
-  created(){
-    this.getProductData()
+  mounted(){
+    this.getDetails()
+  },
+  beforeDestroy () {
+    this.$root.$off('deleteItems')
   }
 }
 </script>

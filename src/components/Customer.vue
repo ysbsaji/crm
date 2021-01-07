@@ -1,156 +1,9 @@
+
 <template>
-  <div>
-    <v-container fluid>
-      <v-banner
-        color="cyan"
-        class="text-center my-3"
-        style="border-radius:4px"
-      >
-        <P class="display-1">Customer Mangement</P>
-      </v-banner>
-      <v-row>
-        <v-col cols="12" lg="9">
-          <v-btn 
-            depressed
-            fab
-            @click="customerDialog = true"
-            color="primary"
-          >
-            <v-icon>
-              mdi-plus
-            </v-icon>
-          </v-btn>
-        </v-col>
-        <v-col cols="12" lg="3">
-          <v-text-field
-            v-model="search"
-            outlined
-            dense
-            append-icon="mdi-magnify"
-            label="Search"
-            single-line
-            hide-details
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row justify="center">
-        <v-dialog
-          v-model="customerDialog"
-          persistent
-          max-width="600px"
-        >
-        <v-form
-          ref="cusForm"
-        >
-          <v-card>
-            <v-card-title>
-              <span class="headline">Customer Details</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      label="Name"
-                      v-model="name"
-                      outlined
-                      dense
-                      :rules="[rules.required]"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                  <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      label="Email"
-                      v-model="email"
-                      dense
-                      outlined
-                      :rules="[rules.required,rules.email]"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                   <v-col
-                    cols="12"
-                    sm="6"
-                    md="4"
-                  >
-                    <v-text-field
-                      label="Phone Number"
-                      v-model="phonenumber"
-                      dense
-                      outlined
-                      :rules="[rules.required,rules.number,rules.min]"
-                      required
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                color="blue darken-1"
-                text
-                @click="cancel"
-              >
-                Close
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                v-show="saveBtn"
-                @click="saveCustomerDetails"
-              >
-                Save
-              </v-btn>
-              <v-btn
-                color="blue darken-1"
-                text
-                v-show="updateBtn"
-                @click="updateCustomerDetails"
-              >
-                Update
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-          </v-form>
-        </v-dialog>
-      </v-row>
-    </v-container>
-    <v-data-table
-      :headers="headers"
-      :items="customerDetails"
-      :search="search"
-      :items-per-page="5"
-      class="elevation-1"
-    >
-    <template v-slot:[`item.action`]="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editCustomer(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="delDialog = true; deleteId = item.id"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-    <span>No data here</span> 
-    </template>
-    </v-data-table>
+   <div>
+    <form-data :references.sync="formReferences" :model="customerObj" ref="form">
+    </form-data>
+    <data-table :payload="displayObj" ></data-table>
     <v-dialog
       v-model="delDialog"
       max-width="320"
@@ -161,7 +14,6 @@
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-
           <v-btn
             color="green darken-1"
             text
@@ -184,89 +36,178 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import FormInput from '@/components/FormInput'
+import DataList from '@/components/DataList.vue'
 export default {
-  data(){
-    return{
-      saveBtn: true,
-      updateBtn: false,
+   data () {
+    return {
       delDialog: false,
-      name: '',
-      email: '',
-      search:'',
-      phonenumber: '',
-      deleteId: '',
-      editId: '',
-      customerDialog: false,
-      rules: {
-        required: value => !!value || 'Required.',
-        min: v => (v.length >= 10) || "Min 10 characters",
-        number: value => !isNaN(value) || 'Invalid input',
-        email: v => /.+@.+\..+/.test(v) || "E-mail must be valid",
+      customerObj: {},
+      displayObj:{
+        headers: [{
+        text: 'Name',
+        value: 'name',
+      },{
+        text: 'Email',
+        value: 'email',
       },
-      headers: [
-        { text: 'Name', align: 'start', value: 'name'},
-        { text: 'Email', align: 'start', value: 'email' },
-        { text: 'Phone Number', align: 'start', value: 'phonenum' },
-        { text: 'Actions', align: 'start', value: 'action', sortable: false }
-      ],
-      customerDetails:[]
+      {
+        text: 'Phone Number',
+        value: 'phoneNumber',
+      },{
+        text: 'Actions',
+        value: 'actions',
+      }],
+        list: [],
+        selection: [],
+        showSelect: true,
+        isHideAdd: true,
+        loading: true,
+        actionsList:[{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.edit(item),
+          icon:'mdi-pencil'
+        },{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.del(item),
+          icon:'mdi-delete'
+        }]
+      },
+      total: 0,
     }
   },
+  components: {
+    'form-data': FormInput,
+    'data-table': DataList
+  },
+  computed: {
+    ...mapGetters(['formType']),
+    formReferences () {
+       return {
+        title: 'Customer Management',
+        properties: [ {
+          model: 'name',
+          type: this.formType.TEXT,
+          rules:[ v => !!v || 'reqired'],
+          label: 'Name',
+          hide: false,
+          class: 'lg4 sm6'
+        },{
+          model: 'email',
+          type: this.formType.TEXT,
+          rules: [ v => !!v || 'reqired' ,v => /.+@.+\..+/.test(v) || "E-mail must be valid"],
+          hide: false,
+          label: 'Email',
+          class: 'lg4 sm6'
+        },{
+          model: 'phoneNumber',
+          type: this.formType.NUMBER,
+          rules: [ v => !!v || 'reqired' ,v => !isNaN(v) || 'Invalid input'],
+          hide: false,
+          label: 'Phone Number',
+          class: 'lg4 sm6'
+        }],
+         buttons: [{
+          name: 'action_handler',
+          color: 'success',
+          label: 'Save',
+          click: () => this.addCustomer(),
+          is_show: true
+        },
+        {
+          name: 'action_handler_update',
+          color: 'primary',
+          label: 'Update',
+          click: () => this.updateCustomer(),
+          is_show: false
+        },
+         {
+          name: 'action_handler_cancel',
+          color: 'orange',
+          label: 'Cancel',
+          click: () => this.cancel(),
+          is_show: true
+        }]
+    }
+  },
+  },
   methods: {
-    saveCustomerDetails(){
-      if(this.$refs.cusForm.validate()){
-      this.customerDialog = false
-      this.customerDetails.push({id:Math.floor(Math.random() * 100) + 1, name:this.name,email:this.email,phonenum:this.phonenumber})
-      localStorage.setItem('cusDetails',JSON.stringify(this.customerDetails))
-      this.$refs.cusForm.reset()
-      }
+   addCustomer(){
+    if(this.$refs.form.$refs.validateForm.validate()){
+      this.customerObj.id = Math.floor(Math.random() * 100) + 1
+      this.displayObj.list.push(this.customerObj)
+      localStorage.setItem('customerDetails', JSON.stringify(this.displayObj.list))
+      this.getCustomer()
+    }
     },
-    editCustomer(item){
-      this.saveBtn = false
-      this.updateBtn = true
-      this.customerDialog = true
-      this.editId = item.id
-      this.name = item.name
-      this.email = item.email
-      this.phonenumber = item.phonenum
+    getCustomer(){
+      this.displayObj.list = []
+      let details = localStorage.getItem('customerDetails')
+      let customer = JSON.parse(details)
+      customer.forEach(val => {
+        this.displayObj.list.push(val)
+      })
+      this.displayObj.loading = false
+      this.$refs.form.$refs.validateForm.reset()
     },
-    updateCustomerDetails(){
-      this.customerDetails.find((val) => {
-        if(val.id === this.editId){
-          val.name = this.name
-          val.email = this.email
-          val.phonenum = this.phonenumber
+    edit(val){
+      this.customerObj = Object.assign({}, val)
+      this.$refs.form._props.references.buttons[0].is_show = false
+      this.$refs.form._props.references.buttons[1].is_show = true
+    },
+    updateCustomer(){
+      this.$refs.form._props.references.buttons[0].is_show = true
+      this.$refs.form._props.references.buttons[1].is_show = false
+      this.displayObj.list.find((val) =>{
+        console.log(val, this.customerObj.name);
+        if(val.id === this.customerObj.id){
+          val.name = this.customerObj.name
+          val.email = this.customerObj.email
+          val.phoneNumber = this.customerObj.phoneNumber
         }
       })
-      localStorage.setItem('cusDetails',JSON.stringify(this.customerDetails))
-      this.customerDialog = false
-      this.saveBtn = true
-      this.updateBtn = false
-      this.$refs.cusForm.reset()
+      localStorage.setItem('customerDetails', JSON.stringify(this.displayObj.list))
+      this.$refs.form.$refs.validateForm.reset()
+    },
+    del(item){
+      this.delDialog = true
+      this.delItem = item
     },
     confirmDel(){
       this.delDialog = false
-      this.customerDetails.find((val,index) => { 
-        val.id === this.deleteId ? this.customerDetails.splice(index,1) : ''
+      this.displayObj.list.find((val,index) => {
+        val === this.delItem ? this.displayObj.list.splice(index,1) : false
       })
-      localStorage.setItem('cusDetails',JSON.stringify(this.customerDetails))
+      localStorage.setItem('customerDetails', JSON.stringify(this.displayObj.list))
     },
     cancel(){
-      this.customerDialog = false
-      this.$refs.cusForm.resetValidation()
+      this.customerObj = {}
+      this.$refs.form.$refs.validateForm.resetValidation()
     },
-    getCusData(){
-      if(localStorage.getItem('cusDetails')){
-        let cusDetails = localStorage.getItem('cusDetails')
-        let details = JSON.parse(cusDetails)
-        details.forEach(val => {
-        this.customerDetails.push(val)
-        })
+    getDetails(){
+      setTimeout(() => {
+        if(localStorage.getItem('customerDetails')){
+        let product = localStorage.getItem('customerDetails')
+        this.displayObj.list= JSON.parse(product)
+        this.displayObj.loading = false
       }
+      },2000)
+       this.$root.$on('deleteItems', (data) => {
+       this.displayObj.list.find((val,index) => {
+       val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+     })
+     localStorage.setItem('customerDetails', JSON.stringify(this.displayObj.list))  
+     })
     }
   },
-  created(){
-    this.getCusData()
+  mounted(){
+    this.getDetails()
+  },
+  beforeDestroy () {
+    this.$root.$off('deleteItems')
   }
 }
 </script>

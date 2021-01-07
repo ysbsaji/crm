@@ -5,8 +5,28 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    athendication: false,
-    login:{}
+    athendication: true,
+    login:{},
+    FORM_TYPE: {
+      TEXT: 'text',
+      TEXTAREA: 'textarea',
+      CHECKBOX: 'checkbox',
+      SELECT: 'select',
+      AUTO_COMPLETE: 'auto_complete',
+      COMBOBOX: 'combobox',
+      DATE: 'date',
+      PASSWORD: 'password',
+      NUMBER: 'number',
+      DATEPICKER: 'datepicker',
+      QUICKADD: 'quickadd',
+      TIMEPICKER: 'timepicker',
+      FILES: 'files',
+      ALERT: 'alert',
+      COLORPICKER: 'color',
+      BUTTON: 'btn',
+      BTNDROPDOWN: 'btnDropdown',
+      RADIO: 'radio'
+    },
   },
   mutations: {
     athendication(state,payload){
@@ -19,5 +39,10 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
+  },
+  getters:{
+    formType (state) {
+      return state.FORM_TYPE
+    },
   }
 })

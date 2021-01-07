@@ -1,171 +1,9 @@
+
 <template>
-  <div>
-    <v-form
-      ref="empForm"
-    >
-      <v-container fluid>
-      <v-banner
-      color="cyan"
-      class="text-center my-3"
-      style="border-radius:4px"
-      >
-        <P class="display-1">User Mangement</P>
-      </v-banner>
-        <v-row>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-            <v-text-field
-              v-model="name"
-              :rules="[rules.required]"
-              counter="25"
-              label="Name"
-              dense
-              outlined
-            ></v-text-field>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-            <v-text-field
-              v-model="email"
-              :rules="[rules.required,rules.email]"
-              counter="25"
-              label="Email"
-              dense
-              outlined
-            ></v-text-field>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-            <v-text-field
-              v-model="phonenum"
-              :rules="[rules.required,rules.number,rules.min1]"
-              counter="25"
-              dense
-              label="Phone Number"
-              outlined
-            ></v-text-field>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-            <v-select
-              :items="employeeRoll"
-              label="Roll"
-              v-model="emproll"
-              dense
-              outlined
-            ></v-select>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-           <v-text-field 
-            v-model="password"
-            outlined
-            dense 
-            :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
-            :rules="[rules.required,rules.min]" 
-            :type="show1 ? 'text' : 'password'" 
-            name="input-10-1" 
-            label="Password" 
-            hint="At least 8 characters" 
-            counter 
-            @click:append="show1 = !show1">
-           </v-text-field>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="3"
-          >
-            <v-text-field 
-              block 
-              dense
-              outlined
-              v-model="verify" 
-              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" 
-              :rules="[rules.required, passwordMatch]" 
-              :type="show1 ? 'text' : 'password'" 
-              name="input-10-1" 
-              label="Confirm Password" 
-              counter 
-              @click:append="show1 = !show1">
-            </v-text-field>
-          </v-col>
-          <v-col
-          cols="12"
-          sm="6"
-          lg="3"
-          >
-          <v-file-input
-            label="File input"
-            outlined
-            dense
-            @change="CreateImage"
-          ></v-file-input>
-        </v-col>
-          <v-col
-            cols="12"
-            lg="1"
-          >
-            <v-btn
-              depressed
-              v-show="saveBtn"
-              @click="saveEmpDetail"
-              color="primary"
-            >Save</v-btn>
-            <v-btn
-              depressed
-              v-show="updateBtn"
-              @click="updateEmpDetails"
-              color="primary"
-            >Update</v-btn>
-          </v-col>
-          <v-col
-            cols="12"
-            lg="2"
-          >
-            <v-btn
-              depressed
-              @click="cancel"
-              color="red"
-            >Cancel</v-btn>
-          </v-col>
-        </v-row>
-      </v-container>
-  </v-form>
-  <v-data-table
-    :headers="headers"
-    :items="empDetails"
-    :items-per-page="5"
-    class="elevation-1"
-  >
-    <template v-slot:[`item.action`]="{ item }">
-      <v-icon
-        small
-        class="mr-2"
-        @click="editEmployee(item)"
-      >
-        mdi-pencil
-      </v-icon>
-      <v-icon
-        small
-        @click="delDialog = true; deleteId = item.id"
-      >
-        mdi-delete
-      </v-icon>
-    </template>
-    <template v-slot:no-data>
-    <span>No data here</span> 
-    </template>
-    </v-data-table>
+   <div>
+    <form-data :references.sync="formReferences" :model="employeeObj" ref="form">
+    </form-data>
+    <data-table :payload="displayObj" ></data-table>
     <v-dialog
       v-model="delDialog"
       max-width="320"
@@ -176,7 +14,6 @@
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
-
           <v-btn
             color="green darken-1"
             text
@@ -195,131 +32,236 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-     <v-snackbar
-      v-model="snackbar"
-      color="red"
-    >This email is already exits
-    </v-snackbar>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
+import FormInput from '@/components/FormInput'
+import DataList from '@/components/DataList.vue'
 export default {
-  data(){
-    return{
-      saveBtn: true,
-      updateBtn: false,
-      name:'',
-      email:'',
-      snackbar: false,
-      phonenum:'',
-      show1: false,
+   data () {
+    return {
       delDialog: false,
-      editId: '',
-      deleteId: '',
-      emproll:'',
-      verify: '',
-      password: '',
-      image:'',
-      employeeRoll:['staff', 'admin'],
-      rules: {
-        required: value => !!value || 'Required.',
-        number: value => !isNaN(value) || 'Invalid input',
-        min1: v => (v && v.length >= 10) || "Min 10 characters",
-        email: v => /.+@.+\..+/.test(v) || "E-mail must be valid",
-        min: v => (v && v.length >= 8) || "Min 8 characters"
+      employeeObj: {
+        id: null,
       },
-      headers: [
-        { text: 'Id', align: 'start', value: 'id'},
-        { text: 'Name', align: 'start', value: 'name' },
-        { text: 'Email', value: 'email', align: 'start', },
-        { text: 'Phone Number', align: 'start', value: 'phonenum' },
-        { text: 'Employee Roll', align: 'start', value: 'emproll' },
-        { text: 'Password', align: 'start', value: 'password' },
-        { text: 'Actions', align: 'start', value: 'action', sortable: false }
-      ],
-      empDetails:[]
+      displayObj:{
+        headers: [{
+        text: 'Name',
+        value: 'name',
+      },{
+        text: 'Email',
+        value: 'email',
+      },
+      {
+        text: 'Phone Number',
+        value: 'phoneNumber',
+      },
+      {
+        text: 'Role',
+        value: 'role',
+      },{
+        text: 'Password',
+        value: 'password',
+      },{
+        text: 'Image',
+        value: 'image',
+      },{
+        text: 'Actions',
+        value: 'actions',
+      }],
+        list: [],
+        selection: [],
+        showSelect: true,
+        isHideAdd: true,
+        loading: true,
+        actionsList:[{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.edit(item),
+          icon:'mdi-pencil'
+        },{
+          is_show: () => {return true},
+          color: () => {return 'success'},
+          click: (item) => this.del(item),
+          icon:'mdi-delete'
+        }]
+      },
+      total: 0,
     }
   },
-  computed: {
-  passwordMatch() {
-    return () => this.password === this.verify || "Password must match";
-  }
+  components: {
+    'form-data': FormInput,
+    'data-table': DataList
   },
-   methods: {
-    saveEmpDetail(){
-      if(this.$refs.empForm.validate()){
-      if(this.empDetails.length > 0){
-      for (let i in this.empDetails){
-        if(this.email === this.empDetails[i].email){
-          this.snackbar = true
-          break
-        }else{
-          this.empDetails.push({id:Math.floor(Math.random() * 100) + 1,url:this.image, name:this.name,email:this.email,phonenum:this.phonenum,emproll:this.emproll,password:this.password})
-          break
+  computed: {
+    ...mapGetters(['formType']),
+    passwordMatch() {
+    return () => this.password === this.verify || "Password must match";
+  },
+    formReferences () {
+       return {
+        title: 'User Management',
+        properties: [ {
+          model: 'name',
+          type: this.formType.TEXT,
+          rules:[ v => !!v || 'reqired'],
+          label: 'Name',
+          hide: false,
+          class: 'lg4 sm6'
+        },{
+          model: 'email',
+          type: this.formType.TEXT,
+          rules: [ v => !!v || 'reqired',v => /.+@.+\..+/.test(v) || "E-mail must be valid"],
+          hide: false,
+          label: 'Email',
+          class: 'lg4 sm6'
+        },{
+          model: 'phoneNumber',
+          type: this.formType.NUMBER,
+          rules: [ v => !!v || 'reqired' ,v => !isNaN(v) || 'Invalid input'],
+          hide: false,
+          label: 'Phone Number',
+          class: 'lg4 sm6'
         }
-      }
-      }else{
-        this.empDetails.push({id:Math.floor(Math.random() * 100) + 1,url:this.image, name:this.name,email:this.email,phonenum:this.phonenum,emproll:this.emproll,password:this.password})
-      }
-      }
-      localStorage.setItem('empDetails',JSON.stringify(this.empDetails))
-      this.$refs.empForm.reset()
+        ,{
+          model: 'role',
+          type: this.formType.SELECT,
+          rules: [],
+          items:['Admin','Staff'],
+          label: 'Role',
+          class: 'lg4 sm6'
+        },
+        {
+          model: 'password',
+          type: this.formType.TEXT,
+          rules: [ v => !!v || 'reqired',v => (v && v.length >= 8) || "Min 8 characters"],
+          hide: false,
+          label: 'Password',
+          class: 'lg4 sm6'
+        },
+        {
+          model: 'file',
+          type: this.formType.FILES,
+          rules: [],
+          change: (file) => this.CreateImage(file[0]),
+          label: 'Files',
+          is_show: true,
+          class: 'lg4 sm6'
+        }
+        ],
+         buttons: [{
+          name: 'action_handler',
+          color: 'success',
+          label: 'Save',
+          click: () => this.addEmployee(),
+          is_show: true
+        },
+        {
+          name: 'action_handler_update',
+          color: 'primary',
+          label: 'Update',
+          click: () => this.updateEmployee(),
+          is_show: false
+        },
+         {
+          name: 'action_handler_cancel',
+          color: 'orange',
+          label: 'Cancel',
+          click: () => this.cancel(),
+          is_show: true
+        }]
+    }
+  },
+  },
+  methods: {
+   addEmployee(){
+    if(this.$refs.form.$refs.validateForm.validate()){
+      this.employeeObj.id =  Math.floor(Math.random() * 100) + 1
+      this.displayObj.list.push(this.employeeObj)
+      localStorage.setItem('employeeDetails', JSON.stringify(this.displayObj.list))
+      this.getEmployee()
+    }
     },
-    editEmployee(item){
-      this.saveBtn = false
-      this.updateBtn = true
-      this.editId = item.id
-      this.id = item.id
-      this.name = item.name
-      this.email = item.email
-      this.phonenum = item.phonenum
-      this.emproll = item.emproll
-      this.password = item.password
+    getEmployee(){
+      this.displayObj.list = []
+      let details = localStorage.getItem('employeeDetails')
+      let product = JSON.parse(details)
+      product.forEach(val => {
+        this.displayObj.list.push(val)
+      })
+      this.displayObj.loading = false
+      this.$refs.form.$refs.validateForm.reset()
     },
-    updateEmpDetails(){
-      this.empDetails.find((val) => {
-        if(val.id === this.editId){
-          val.name = this.name
-          val.email = this.email
-          val.phonenum = this.phonenum
-          val.emproll = this.emproll
-          val.password = this.password
+    edit(val){
+      this.employeeObj = Object.assign({}, val)
+      this.$refs.form._props.references.buttons[0].is_show = false
+      this.$refs.form._props.references.buttons[1].is_show = true
+    },
+    updateEmployee(){
+      this.$refs.form._props.references.buttons[0].is_show = true
+      this.$refs.form._props.references.buttons[1].is_show = false
+      this.displayObj.list.find((val) =>{
+        if(val.id === this.employeeObj.id){
+          val.name = this.employeeObj.name
+          val.email = this.employeeObj.email
+          val.phoneNumber = this.employeeObj.phoneNumber
+          val.role  = this.employeeObj.role
+          val.password  = this.employeeObj.password
+          val.image = this.employeeObj.image
         }
       })
-      localStorage.setItem('empDetails',JSON.stringify(this.empDetails))
-      this.saveBtn = true
-      this.updateBtn = false
-      this.$refs.empForm.reset() 
+      localStorage.setItem('employeeDetails', JSON.stringify(this.displayObj.list))
+      this.$refs.form.$refs.validateForm.reset()
     },
-    cancel(){
-      this.$refs.empForm.reset()
+    del(item){
+      this.delDialog = true
+      this.delItem = item
     },
     confirmDel(){
       this.delDialog = false
-      console.log(this.deleteId);
-      this.empDetails.find((val,index) => { 
-        val.id === this.deleteId ? this.empDetails.splice(index,1) : false
-        console.log(this.empDetails);
+      this.displayObj.list.find((val,index) => {
+        val === this.delItem ? this.displayObj.list.splice(index,1) : false
       })
-      localStorage.setItem('empDetails',JSON.stringify(this.empDetails))
-    },
-    getEmpData(){
-      if(localStorage.getItem('empDetails')){
-        let empDetails = localStorage.getItem('empDetails')
-        this.empDetails = JSON.parse(empDetails)
-      }
+      localStorage.setItem('employeeDetails', JSON.stringify(this.displayObj.list))
     },
     CreateImage(file){
+      if(file){
         var reader = new FileReader();
         reader.addEventListener('load', (e) => {
-          this.image = e.target.result
-        })
+        this.employeeObj.image = e.target.result
+      })
         reader.readAsDataURL(file)
+      }
+    },
+    cancel(){
+      this.productObj={
+        id: null,
+      }
+      this.$refs.form.$refs.validateForm.resetValidation()
+    },
+    getDetails(){
+      setTimeout(() => {
+        if(localStorage.getItem('employeeDetails')){
+        let product = localStorage.getItem('employeeDetails')
+        this.displayObj.list= JSON.parse(product)
+        this.displayObj.loading = false
+      }
+      },2000)
+       this.$root.$on('deleteItems', (data) => {
+       this.displayObj.list.find((val,index) => {
+       val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+     })
+     localStorage.setItem('employeeDetails', JSON.stringify(this.displayObj.list))  
+     })
     }
   },
   mounted(){
-    this.getEmpData()
+    this.getDetails()
+  },
+  beforeDestroy () {
+    this.$root.$off('deleteItems')
   }
 }
 </script>

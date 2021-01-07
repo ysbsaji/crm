@@ -9,7 +9,7 @@
       class="mx-auto "
       max-width="344"
       height="150px"
-      color="green"
+      color="saji"
       @click="customerDetail"
     >
       <v-card-text>
@@ -140,6 +140,7 @@ export default {
       reveal: false,
       head: '',
       customer:[],
+      orginProductArr: [],
       employee:[],
       order:[],
       product:[],
@@ -168,33 +169,30 @@ export default {
   },
   methods:{
     customerDetail(){
-      this.reveal = true
-      this.headers = []
-      this.details = []
+      this.changeData()
       this.head = 'Customer Details'
-      this.headers.push({text:'Id', align: 'start', value:'id'},{text:'Name', align: 'start',value:'name'},{text:'Email', align: 'start',value:'email'},{text:'Phone Number', align: 'start',value:'phonenum'})
+      this.headers.push({text:'Id', align: 'start', value:'id'},{text:'Name', align: 'start',value:'name'},{text:'Email', align: 'start',value:'email'},{text:'Phone Number', align: 'start',value:'phoneNumber'})
       this.customer.forEach(val => { this.details.push(val) })
     },
-    employeeDetails(){
+    changeData(){
       this.reveal = true
       this.headers = []
       this.details = []
+    },
+    employeeDetails(){
+      this.changeData()
       this.head = 'Employee Details'
-      this.headers.push({text:'Id', align: 'start',value:'id'},{text:'Name', align: 'start',value:'name'},{text:'Email', align: 'start',value:'email'})
+      this.headers.push({text:'Name', align: 'start',value:'name'},{text:'Email', align: 'start',value:'email'},{text:'Id', align: 'start',value:'id'})
       this.employee.forEach(val => { this.details.push(val) })
     },
     productDetails(){
-      this.reveal = true
-      this.headers = []
-      this.details = []
+      this.changeData()
       this.head = 'Product Details'
       this.headers.push({text:'Code', align: 'start',value:'id'},{text:'Product Name', align: 'start',value:'name'},{text:'Net Price', align: 'start',value:'netPrice'},{text:'Sale Price', align: 'start',value:'salePrice'},{text:'Description', align: 'start',value:'description'})
       this.product.forEach(val => { this.details.push(val) })
     },
     orderDetails(){
-      this.reveal = true
-      this.headers = []
-      this.details = []
+      this.changeData()
       this.head = 'Order Details'
       this.headers.push({text:'Id', align: 'start',value:'id'},{text:'Date', align: 'start',value:'date'},{text:'Customer Name', align: 'start',value:'cusName'},{text:'Incharge', align: 'start',value:'incharge'},{text:'Product Name', align: 'start',value:'proList'},{text:'quantity', align: 'start',value:'quantity'},{text:'Status', align: 'start',value:'status'})
       this.order.forEach(val => { this.details.push(val) })
@@ -217,23 +215,28 @@ export default {
         }
         break
       }
-      if(localStorage.getItem('empDetails')){
-        let empDetails = localStorage.getItem('empDetails')
+      if(localStorage.getItem('employeeDetails')){
+        let empDetails = localStorage.getItem('employeeDetails')
          this.employee = JSON.parse(empDetails)
       }
-      if(localStorage.getItem('cusDetails')){
-      let cusDetails = localStorage.getItem('cusDetails')
+      if(localStorage.getItem('customerDetails')){
+      let cusDetails = localStorage.getItem('customerDetails')
       this.customer = JSON.parse(cusDetails)
       }
       if(localStorage.getItem('productDetails')){
       let productDetails = localStorage.getItem('productDetails')
       this.product = JSON.parse(productDetails)
       }
+      if(localStorage.getItem('orginProductArr')){
+      let productDetails = localStorage.getItem('orginProductArr')
+      let seprate = JSON.parse(productDetails)
+      seprate.forEach(val => { this.orginProductArr.push(val.product) })
+      }
       let ordered = 0
       let shipped = 0
       let arrived = 0 
       let delivered = 0
-      this.order.forEach(val => {
+      this.orginProductArr.forEach(val => {
       switch(val.status){
         case 'ordered':
           ++ordered

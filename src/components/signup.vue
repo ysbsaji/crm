@@ -14,7 +14,7 @@
                   <v-text-field v-model="loginEmail" :rules="loginEmailRules" label="E-mail" required></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="loginPassword" :append-icon="show1?'eye':'eye-off'" :rules="[rules.required, rules.min]" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Password" hint="At least 8 characters" counter @click:append="show1 = !show1"></v-text-field>
+                  <v-text-field v-model="loginPassword" :append-icon="show1?'mdi-eye':'mdi-eye-off'" :rules="[rules.required, rules.min]" :type="show1 ? 'text' : 'password'" name="input-10-1" label="Password" hint="At least 8 characters" counter @click:append="show1 = !show1"></v-text-field>
                 </v-col>
                 <v-col class="d-flex" cols="12" sm="6" xsm="12">
                 </v-col>
@@ -101,8 +101,8 @@ export default {
       this.loginEmail === 0 ?  (this.$store.commit('login', user),this.loadingDialog = true) : this.snackbar = true
     },
     getUserDetail(){
-      if(localStorage.getItem('empDetails')){
-        let empDetails = localStorage.getItem('empDetails')
+      if(localStorage.getItem('employeeDetails')){
+        let empDetails = localStorage.getItem('employeeDetails')
         let details = JSON.parse(empDetails)
         details.forEach(val => {
         this.userDetails.push(val)
