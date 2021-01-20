@@ -162,7 +162,6 @@ export default {
       this.$refs.form._props.references.buttons[0].is_show = true
       this.$refs.form._props.references.buttons[1].is_show = false
       this.displayObj.list.find((val) =>{
-        console.log(val, this.customerObj.name);
         if(val.id === this.customerObj.id){
           val.name = this.customerObj.name
           val.email = this.customerObj.email

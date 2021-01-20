@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    athendication: true,
+    athendication: false,
     login:{},
     FORM_TYPE: {
       TEXT: 'text',
