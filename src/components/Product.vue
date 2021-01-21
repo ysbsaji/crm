@@ -243,11 +243,11 @@ export default {
       }
       },2000)
       this.$root.$on('deleteItems', (data) => {
-      this.displayObj.list.find((val,index) => {
-        val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+        this.displayObj.list.find((val,index) => {
+          val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+        })
+      localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))  
       })
-     localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))  
-     })
     }
   },
   mounted(){

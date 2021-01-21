@@ -217,20 +217,20 @@ export default {
       }
       if(localStorage.getItem('employeeDetails')){
         let empDetails = localStorage.getItem('employeeDetails')
-         this.employee = JSON.parse(empDetails)
+        this.employee = JSON.parse(empDetails)
       }
       if(localStorage.getItem('customerDetails')){
-      let cusDetails = localStorage.getItem('customerDetails')
-      this.customer = JSON.parse(cusDetails)
+        let cusDetails = localStorage.getItem('customerDetails')
+        this.customer = JSON.parse(cusDetails)
       }
       if(localStorage.getItem('productDetails')){
-      let productDetails = localStorage.getItem('productDetails')
-      this.product = JSON.parse(productDetails)
+        let productDetails = localStorage.getItem('productDetails')
+        this.product = JSON.parse(productDetails)
       }
       if(localStorage.getItem('orginProductArr')){
-      let productDetails = localStorage.getItem('orginProductArr')
-      let seprate = JSON.parse(productDetails)
-      seprate.forEach(val => { this.orginProductArr.push(val.product) })
+        let productDetails = localStorage.getItem('orginProductArr')
+        let seprate = JSON.parse(productDetails)
+        seprate.forEach(val => { this.orginProductArr.push(val.product) })
       }
       let ordered = 0
       let shipped = 0
@@ -252,7 +252,7 @@ export default {
           break
       }
       })
-      this.chartOptionsBar.series[0].data.push(ordered,shipped,arrived,delivered,this.order.length)
+      this.chartOptionsBar.series[0].data.push(ordered,shipped,arrived,delivered,this.orginProductArr.length)
     }
   },
   mounted(){

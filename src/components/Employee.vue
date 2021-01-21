@@ -230,8 +230,8 @@ export default {
       if(file){
         var reader = new FileReader();
         reader.addEventListener('load', (e) => {
-        this.employeeObj.image = e.target.result
-      })
+          this.employeeObj.image = e.target.result
+        })
         reader.readAsDataURL(file)
       }
     },

@@ -111,8 +111,7 @@ export default {
     },
   },
   watch: {
-    loadingDialog (val) {
-      if (!val) return
+    loadingDialog () {
       setTimeout(() => (this.loadingDialog = false,this.$store.commit('athendication', true), this.$router.push('dashbord')), 2000)
     }
   },
