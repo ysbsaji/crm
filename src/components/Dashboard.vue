@@ -124,7 +124,7 @@
       </v-card>
     </v-expand-transition>
     <v-divider></v-divider>
-    <div  style="border:2px solid red; border-radius:10px" class="my-3"  v-if="$store.state.login.emproll === 'admin'">
+    <div  style="border:2px solid red; border-radius:10px" class="my-3"  v-if="$store.state.login.role === 'Admin'">
       <h1 class="text-center">Orders Details in chart</h1>
       <v-row justify="center">
         <chart :options="chartOptionsBar" ></chart>
