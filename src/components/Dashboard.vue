@@ -194,18 +194,18 @@ export default {
     orderDetails(){
       this.changeData()
       this.head = 'Order Details'
-      this.headers.push({text:'Id', align: 'start',value:'id'},{text:'Date', align: 'start',value:'date'},{text:'Customer Name', align: 'start',value:'cusName'},{text:'Incharge', align: 'start',value:'incharge'},{text:'Product Name', align: 'start',value:'proList'},{text:'quantity', align: 'start',value:'quantity'},{text:'Status', align: 'start',value:'status'})
+      this.headers.push({text:'Id', align: 'start',value:'id'},{text:'Date', align: 'start',value:'date'},{text:'Customer Name', align: 'start',value:'cusName'},{text:'Incharge', align: 'start',value:'incharge'})
       this.order.forEach(val => { this.details.push(val) })
     },
     getDetails(){
-      switch(this.$store.state.login.emproll){
-        case 'admin':
+      switch(this.$store.state.login.role){
+        case 'Admin':
           if(localStorage.getItem('orderDetails')){
           let orderDetails = localStorage.getItem('orderDetails')
           this.order = JSON.parse(orderDetails)
           }
           break
-        case 'staff':
+        case 'Staff':
           if(localStorage.getItem('orderDetails')){
           let orderDetails = localStorage.getItem('orderDetails')
           let details = JSON.parse(orderDetails)

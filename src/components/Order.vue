@@ -304,6 +304,7 @@ export default {
       this.formReferences1.buttons[0].is_show = false
       this.formReferences1.buttons[1].is_show = true
       this.ordereditindex = editindex
+      this.productObj = { }
       this.productShownArr.forEach((val, index) => {
          if(editindex === index){
            this.productObj.product = val.product
@@ -335,7 +336,7 @@ export default {
        this.productObj={
         id: null,
       }
-      this.$refs.form1.$refs.validateForm.resetValidation()
+      if(this.$refs.form1) this.$refs.form1.$refs.validateForm.resetValidation()
       this.formReferences1.buttons[0].is_show = true
       this.formReferences1.buttons[1].is_show = false
     },
@@ -364,7 +365,7 @@ export default {
       product.forEach(val => {
         this.displayObj.list.push(val)
       })
-      this.orderDialog = false
+       this.orderDialog = false
       this.displayObj.loading = false
       this.$refs.form.$refs.validateForm.reset()
     },
@@ -385,15 +386,15 @@ export default {
       this.$refs.form._props.references.buttons[0].is_show = true
       this.$refs.form._props.references.buttons[1].is_show = false
       this.displayObj.list.find((val) =>{
-        if(val.id === this.orderObj.id){
-          val.cusName = this.orderObj.cusName
-          val.incharge = this.orderObj.incharge
-          val.date  = this.orderObj.date
-        }
-      })
-      this.orderDialog = false
-      localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))
-      this.$refs.form.$refs.validateForm.reset()
+      if(val.id === this.orderObj.id){
+        val.cusName = this.orderObj.cusName
+        val.incharge = this.orderObj.incharge
+        val.date  = this.orderObj.date
+      }
+    })
+    this.orderDialog = false
+    localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))
+    this.$refs.form.$refs.validateForm.reset()
     },
     del(item){
       this.delDialog = true
@@ -419,25 +420,25 @@ export default {
       this.shownProduct = true
     },
     getDetails(){
-      if(localStorage.getItem('productDetails')){
-      let product = localStorage.getItem('productDetails')
-      let details= JSON.parse(product)
+       if(localStorage.getItem('productDetails')){
+        let product = localStorage.getItem('productDetails')
+        let details= JSON.parse(product)
         details.forEach(val => {
           this.formReferences1.properties[0].items.push(val.name)
         })
       }
-      if(localStorage.getItem('orginProductArr')){
+       if(localStorage.getItem('orginProductArr')){
         let orginProductArr = localStorage.getItem('orginProductArr')
         this.orginProductArr = JSON.parse(orginProductArr)
       }
-      if(localStorage.getItem('orderDetails')){
+       if(localStorage.getItem('orderDetails')){
         let product = localStorage.getItem('orderDetails')
         let details= JSON.parse(product)
         details.forEach(val => {
           this.displayObj.list.push(val)
         })
       }
-      if(localStorage.getItem('employeeDetails')){
+       if(localStorage.getItem('employeeDetails')){
         let product = localStorage.getItem('employeeDetails')
         let details= JSON.parse(product)
         details.forEach(val => {
@@ -452,11 +453,11 @@ export default {
         })
       }
       this.$root.$on('deleteItems', (data) => {
-        this.displayObj.list.find((val,index) => {
-          val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
-        })
-      localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))  
+      this.displayObj.list.find((val,index) => {
+        val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
       })
+     localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))  
+     })
     }
   },
   mounted(){
