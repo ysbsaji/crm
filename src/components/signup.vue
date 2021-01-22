@@ -1,5 +1,5 @@
 <template>
-<v-app style="background-image:url('https://thumbs.dreamstime.com/b/crm-customer-relationship-management-tablet-office-desk-150255008.jpg">
+<v-app>
   <div>
     <div style="width:600px; margin-top:15%; border:1px solid cyan" class="mx-auto">
       <v-card class="px-4">

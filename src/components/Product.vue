@@ -243,10 +243,13 @@ export default {
       }
       },2000)
       this.$root.$on('deleteItems', (data) => {
-        this.displayObj.list.find((val,index) => {
-          val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
-        })
-      localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))  
+        data.ids.forEach(value => {
+          this.displayObj.list.forEach((val,index) => {
+            val.id === value ? this.displayObj.list.splice(index,1) : false
+          })
+        })  
+        this.displayObj.selection= []
+        localStorage.setItem('productDetails', JSON.stringify(this.displayObj.list))  
       })
     }
   },

@@ -328,8 +328,13 @@ export default {
     },
     del1(index){
       this.productShownArr.find((val,index1) => {
-        index1 === index ? this.productShownArr.splice(index,1) : false
+        if (index1 === index) {
+          this.orginProductArr.forEach((value, index2) => {
+            val.id === value.product.id ? (this.orginProductArr.splice(index2,1),this.productShownArr.splice(index,1)) : false
+          })
+        } 
       })
+      localStorage.setItem('orginProductArr', JSON.stringify(this.orginProductArr))
     },
     productFunction(){
       this.productdia = true
@@ -453,11 +458,14 @@ export default {
         })
       }
       this.$root.$on('deleteItems', (data) => {
-      this.displayObj.list.find((val,index) => {
-        val.id === data.ids[0] ? this.displayObj.list.splice(index,1) : false
+        data.ids.forEach(value => {
+          this.displayObj.list.forEach((val,index) => {
+            val.id === value ? this.displayObj.list.splice(index,1) : false
+          })
+        })  
+        this.displayObj.selection= []
+        localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))  
       })
-     localStorage.setItem('orderDetails', JSON.stringify(this.displayObj.list))  
-     })
     }
   },
   mounted(){
