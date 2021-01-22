@@ -144,7 +144,7 @@ export default {
         {
           model: 'file',
           type: this.formType.FILES,
-          rules: [],
+          rules:[ v => !!v || 'reqired'],
           change: (file) => this.CreateImage(file[0]),
           label: 'Files',
           is_show: true,
