@@ -125,6 +125,7 @@ export default {
   },
   beforeDestroy () {
     this.$eventBus.$off('deleteSuccess')
+    this.$eventBus.$off('deleteSuccess')
     this.$eventBus.$off('deleteItems')
   }
 }
